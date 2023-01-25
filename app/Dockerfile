@@ -1,8 +1,13 @@
 FROM python:3.8-slim
 ENV PYTHONUNBUFFERED=1
+#disable for production build
+ENV FLASK_DEBUG=0
 RUN mkdir /var/www
-COPY requirements.txt /var/www/
-RUN cd /var/www && \
-    python3 -m pip install -r requirements.txt
+WORKDIR /var/www
+COPY requirements.txt .
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 COPY app.py .
-ENTRYPOINT ["gunicorn", "app:app", "--bind=0.0.0.0:8000", "--workers=4", "--log-level=debug", "--reload"]
+RUN python3 -m pip install -r requirements.txt
+ENTRYPOINT ["/entrypoint.sh"]
+
